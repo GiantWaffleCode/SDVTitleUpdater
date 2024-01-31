@@ -7,7 +7,6 @@ from twitchAPI.type import AuthScope
 import asyncio
 import time
 
-
 def gen_title():
     #Import XML File
     tree = ET.parse(r"C:\Users\waffl\AppData\Roaming\StardewValley\Saves\Clickbait_366212092\SaveGameInfo")
@@ -45,24 +44,32 @@ def gen_title():
 
     return TITLE_STRING
 
-#Import Secrets
-app_id = idsecrets.id
-app_secret = idsecrets.secret
-channel_id = idsecrets.channel
 
-#Function to Set Title
-async def set_title(TITLE_STRING):
+async def auth():
+    #Import Secrets
+    app_id = idsecrets.id
+    app_secret = idsecrets.secret
+    
     twitch = await Twitch(app_id, app_secret)
-
     target_scope = [AuthScope.CHANNEL_MANAGE_BROADCAST]
     auth = UserAuthenticator(twitch, target_scope, force_verify=False)
     # this will open your default browser and prompt you with the twitch verification website
     token, refresh_token = await auth.authenticate()
     # add User authentication
     await twitch.set_user_authentication(token, target_scope, refresh_token)
+
+    return twitch
+
+#Function to Set Title
+async def set_title(twitch, TITLE_STRING):
+    channel_id = idsecrets.channel
     #Set Title
     await twitch.modify_channel_information(channel_id, title=TITLE_STRING)
 
+#Auth with Twitch
+print('Authing...')
+twitch = asyncio.run(auth())
+print(f'Auth Complete...')
 #Main Loop
 while True:
     now = time.time()
@@ -74,6 +81,6 @@ while True:
         title = gen_title()
         titleid = f'{title} | {unixid}'
         print(f'Title = {titleid}')
-        asyncio.run(set_title(titleid)) 
+        asyncio.run(set_title(twitch, titleid)) 
         print(f'Title Set Complete')
     time.sleep(1)
