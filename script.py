@@ -39,6 +39,14 @@ def gen_title():
         elif child.tag == year:
             current_year_val = child.text
 
+    if current_day_val == '29':
+        current_day_val = '1'
+        if current_season_val == '3':
+            current_season_val = '0'
+            current_year_val = str(int(current_year_val) + 1) 
+        else:
+            current_season_val = str(int(current_season_val) + 1)
+
     TITLE_STRING = f'{seasons[current_season_val]} {current_day_val} - Year {current_year_val} | Stardew Valley Expanded Mod | !sdv'
     #print(TITLE_STRING)
 
@@ -57,7 +65,6 @@ async def auth():
     token, refresh_token = await auth.authenticate()
     # add User authentication
     await twitch.set_user_authentication(token, target_scope, refresh_token)
-
     return twitch
 
 #Function to Set Title
